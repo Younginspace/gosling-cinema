@@ -1,0 +1,293 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --frame-width: 400px;
+  --strip-height: 320px;
+  --sprocket-h: 22px;
+}
+
+html, body {
+  overflow: hidden;
+  background: #000;
+  color: #fff;
+  font-family: var(--font-display);
+  -webkit-font-smoothing: antialiased;
+  height: 100%;
+  user-select: none;
+}
+
+/* ==================== BOOT SCREEN ==================== */
+#boot-screen {
+  position: fixed; inset: 0; z-index: 1000;
+  background: #1a0a6e;
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity 0.5s ease;
+}
+#boot-screen.hidden { display: none; }
+#boot-screen.fade-out { opacity: 0; pointer-events: none; }
+
+.crt-overlay {
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(0deg, rgba(0,0,0,0.15) 0px, rgba(0,0,0,0.15) 1px, transparent 1px, transparent 3px);
+  pointer-events: none; z-index: 1;
+}
+#boot-screen::before {
+  content: ''; position: absolute; inset: 0;
+  box-shadow: inset 0 0 120px rgba(0,0,0,0.7), inset 0 0 60px rgba(0,0,0,0.4);
+  border-radius: 20px; pointer-events: none; z-index: 2;
+}
+#boot-screen::after {
+  content: ''; position: absolute; inset: 0;
+  animation: flicker 0.15s infinite; pointer-events: none; z-index: 3;
+}
+@keyframes flicker {
+  0% { opacity: 0.27; } 15% { opacity: 0.91; } 50% { opacity: 0.96; }
+  55% { opacity: 0.09; } 85% { opacity: 0.70; } 100% { opacity: 0.24; }
+}
+.boot-content {
+  position: relative; z-index: 10; font-family: var(--font-mono);
+  color: #c0c0c0; max-width: 700px; width: 90%;
+  text-shadow: 0 0 8px rgba(200,200,255,0.3);
+}
+.boot-logo {
+  font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 700; color: #fff;
+  letter-spacing: 0.15em; margin-bottom: 0.5rem;
+  text-shadow: 0 0 20px rgba(200,200,255,0.5);
+}
+.blink { animation: cursor-blink 1s step-end infinite; }
+@keyframes cursor-blink { 50% { opacity: 0; } }
+.boot-sub { font-size: clamp(0.7rem, 1.5vw, 0.9rem); color: #a0a0c0; line-height: 1.6; }
+.boot-text { font-size: clamp(0.65rem, 1.2vw, 0.8rem); color: #8888aa; line-height: 1.8; min-height: 4em; }
+.boot-progress-wrap { width: 100%; height: 24px; border: 2px solid #c0c0c0; padding: 3px; }
+.boot-progress-bar {
+  height: 100%; width: 0%;
+  background: repeating-linear-gradient(90deg, #c0c0c0 0px, #c0c0c0 14px, transparent 14px, transparent 18px);
+  transition: width 0.1s linear;
+}
+.boot-status { margin-top: 0.5rem; font-size: 0.75rem; color: #8888aa; }
+
+/* ==================== WEBGL CANVAS ==================== */
+#webgl-canvas {
+  position: fixed; inset: 0; width: 100vw; height: 100vh;
+  z-index: 1; display: block;
+}
+
+/* ==================== FILM INFO (top) ==================== */
+#film-info {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 20; text-align: center;
+  padding: 1.8rem 2rem 0.5rem; pointer-events: none;
+}
+#film-info-title {
+  font-size: clamp(2.5rem, 6vw, 5rem); font-weight: 900;
+  letter-spacing: 0.02em; line-height: 1; margin-bottom: 0.3rem;
+  text-shadow: 0 4px 30px rgba(255,255,255,0.12), 0 0 60px rgba(255,255,255,0.06);
+}
+#film-info-meta {
+  font-family: var(--font-mono);
+  font-size: clamp(0.75rem, 1.2vw, 0.9rem);
+  opacity: 0.5; letter-spacing: 0.15em;
+}
+
+/* ==================== 3D CAROUSEL ==================== */
+#carousel-viewport {
+  position: fixed;
+  left: 0; right: 0;
+  /* Center vertically — shared across all breakpoints */
+  top: 75%;
+  transform: translateY(-50%);
+  height: var(--strip-height);
+  z-index: 10;
+  overflow: visible;
+  cursor: grab;
+
+  /* THE KEY: single perspective for the entire 3D scene */
+  perspective: 2200px;
+  perspective-origin: 50% 42%;
+}
+#carousel-viewport:active { cursor: grabbing; }
+
+/* The cylinder that rotates */
+#carousel-cylinder {
+  position: absolute;
+  width: 0; height: 0;
+  /* Center the cylinder in the viewport */
+  left: 50%;
+  top: 50%;
+  transform-style: preserve-3d;
+  /* Animated via JS: rotateX(tilt) rotateY(angle) */
+  transition: none;
+}
+
+/* ==================== FILM SEGMENT ==================== */
+.film-segment {
+  position: absolute;
+  width: var(--frame-width);
+  height: var(--strip-height);
+  /* Center each segment on the cylinder origin */
+  left: calc(var(--frame-width) / -2);
+  top: calc(var(--strip-height) / -2);
+
+  /* 3D transform set by JS: rotateY(N) translateZ(R) */
+  backface-visibility: hidden;
+
+  display: flex;
+  flex-direction: column;
+  background: #2a2520;
+  overflow: hidden;
+  border: 2px solid #3a3530;
+  box-shadow:
+    0 8px 50px rgba(0,0,0,0.9),
+    0 2px 8px rgba(0,0,0,0.5);
+}
+
+/* Sprocket strips */
+.seg-sprocket {
+  height: var(--sprocket-h);
+  background: #2a2520;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  padding: 0 8px;
+  flex-shrink: 0;
+}
+
+.sp-hole {
+  display: block;
+  width: 15px;
+  height: 11px;
+  background: #0a0805;
+  border-radius: 2px;
+  border: 1px solid rgba(80,70,50,0.3);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.8), 0 0 1px rgba(120,100,70,0.15);
+}
+
+/* The frame content area */
+.seg-frame {
+  flex: 1;
+  margin: 3px 4px;
+  overflow: hidden;
+  position: relative;
+  background: #0c0c10;
+  border-radius: 2px;
+  border: 1px solid rgba(0,0,0,0.5);
+}
+
+.seg-frame::after {
+  content: '';
+  position: absolute; inset: 0;
+  box-shadow: inset 0 0 40px rgba(0,0,0,0.3);
+  pointer-events: none;
+}
+
+.seg-poster {
+  width: 100%; height: 100%;
+  display: flex;
+  align-items: center; justify-content: center;
+  background: radial-gradient(ellipse at center, rgba(25,25,35,1) 0%, rgba(8,8,12,1) 100%);
+}
+
+.poster-placeholder {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.1);
+  text-align: center; line-height: 1.8;
+}
+
+.seg-poster img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+
+/* Empty padding frames */
+.film-segment-empty {
+  opacity: 0.5;
+}
+
+/* ==================== NAV BUTTONS ==================== */
+.nav-btn {
+  position: fixed; top: 50%; transform: translateY(-50%);
+  z-index: 25;
+  width: 48px; height: 48px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  background: rgba(0,0,0,0.45);
+  color: #fff; font-size: 1.3rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(8px);
+  transition: background 0.3s, border-color 0.3s, transform 0.2s;
+}
+.nav-btn:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.25); }
+.nav-btn:active { transform: translateY(-50%) scale(0.92); }
+#nav-prev { left: 1.5rem; }
+#nav-next { right: 1.5rem; }
+
+/* ==================== DOTS ==================== */
+#dot-indicators {
+  position: fixed; bottom: 4%; left: 50%; transform: translateX(-50%);
+  z-index: 20; display: flex; gap: 10px;
+}
+.dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.1);
+  transition: all 0.4s; cursor: pointer;
+}
+.dot.active {
+  background: rgba(255,255,255,0.8);
+  border-color: rgba(255,255,255,0.6);
+  box-shadow: 0 0 10px rgba(255,255,255,0.3);
+  transform: scale(1.3);
+}
+
+/* ==================== CREDITS ==================== */
+#credits-line {
+  position: fixed; bottom: 1%; left: 50%; transform: translateX(-50%);
+  z-index: 15; font-family: var(--font-mono);
+  font-size: 0.65rem; opacity: 0.15; letter-spacing: 0.1em; white-space: nowrap;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+  :root {
+    --frame-width: 260px;
+    --strip-height: 210px;
+    --sprocket-h: 14px;
+  }
+  #film-info { padding: 2.5rem 1rem 0.3rem; }
+  #film-info-title { font-size: clamp(1.8rem, 8vw, 2.8rem); }
+  #film-info-meta { font-size: 0.65rem; }
+
+  #carousel-viewport {
+    top: 65%;
+    perspective: 2000px;
+  }
+
+  .seg-frame { margin: 2px 3px; }
+  .sp-hole { width: 10px; height: 7px; }
+
+  .nav-btn { width: 36px; height: 36px; font-size: 1rem; }
+  #nav-prev { left: 0.5rem; }
+  #nav-next { right: 0.5rem; }
+
+  #dot-indicators { bottom: 2%; gap: 8px; }
+  .dot { width: 6px; height: 6px; }
+
+  #credits-line { font-size: 0.5rem; }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --frame-width: 220px;
+    --strip-height: 180px;
+    --sprocket-h: 12px;
+  }
+  #film-info { padding: 1.5rem 0.8rem 0.2rem; }
+  .sp-hole { width: 8px; height: 5px; }
+}
