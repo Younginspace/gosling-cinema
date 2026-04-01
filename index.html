@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gosling Cinema</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- CRT Boot Screen -->
+  <div id="boot-screen">
+    <div class="crt-overlay"></div>
+    <div class="boot-content">
+      <div class="boot-logo">GOSLING<span class="blink">_</span></div>
+      <div class="boot-sub">Gosling Cinema System, Version 1.0</div>
+      <div class="boot-sub">Copyright (c) Gosling Filmography 2026. All Rights Reserved.</div>
+      <br>
+      <div class="boot-text" id="boot-text"></div>
+      <br>
+      <div class="boot-progress-wrap">
+        <div class="boot-progress-bar" id="boot-progress"></div>
+      </div>
+      <div class="boot-status" id="boot-status">Initializing...</div>
+    </div>
+  </div>
+
+  <!-- Three.js Canvas (fixed background) -->
+  <canvas id="webgl-canvas"></canvas>
+
+  <!-- Film info overlay (top) -->
+  <div id="film-info">
+    <h1 id="film-info-title"></h1>
+    <p id="film-info-meta"></p>
+  </div>
+
+  <!-- 3D Film Strip Carousel -->
+  <div id="carousel-viewport">
+    <div id="carousel-cylinder">
+      <!-- frames injected by JS -->
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <button id="nav-prev" class="nav-btn" aria-label="Previous">&larr;</button>
+  <button id="nav-next" class="nav-btn" aria-label="Next">&rarr;</button>
+
+  <!-- Dot indicators -->
+  <div id="dot-indicators"></div>
+
+  <!-- Credits line -->
+  <div id="credits-line">
+    Built with Three.js + GSAP &middot; A Ryan Gosling Story
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
