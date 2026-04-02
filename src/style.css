@@ -7,19 +7,36 @@
 :root {
   --font-display: 'Playfair Display', Georgia, serif;
   --font-mono: 'JetBrains Mono', 'Courier New', monospace;
-  --frame-width: 400px;
-  --strip-height: 320px;
-  --sprocket-h: 22px;
+  --frame-width: 340px;
+  --strip-height: 280px;
+  --sprocket-h: 20px;
 }
 
 html, body {
-  overflow: hidden;
   background: #000;
   color: #fff;
   font-family: var(--font-display);
   -webkit-font-smoothing: antialiased;
-  height: 100%;
+  min-height: 100%;
   user-select: none;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+body.no-scroll {
+  overflow: hidden;
+}
+
+/* Utility: hidden until JS reveals */
+.initially-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ==================== SCROLL SPACER ==================== */
+#scroll-spacer {
+  position: relative;
+  height: 300vh;
+  pointer-events: none;
 }
 
 /* ==================== BOOT SCREEN ==================== */
@@ -27,7 +44,7 @@ html, body {
   position: fixed; inset: 0; z-index: 1000;
   background: #1a0a6e;
   display: flex; align-items: center; justify-content: center;
-  transition: opacity 0.5s ease;
+  transition: opacity 0.6s ease;
 }
 #boot-screen.hidden { display: none; }
 #boot-screen.fade-out { opacity: 0; pointer-events: none; }
@@ -78,11 +95,60 @@ html, body {
   z-index: 1; display: block;
 }
 
+/* ==================== HERO OVERLAY ==================== */
+#hero-overlay {
+  position: fixed; inset: 0; z-index: 15;
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: flex-start;
+  padding: 0 8%;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+.hero-title {
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+  color: #fff;
+  text-shadow: 0 4px 40px rgba(0,0,0,0.6);
+}
+.hero-title em {
+  font-style: italic;
+  font-weight: 700;
+}
+.hero-sub {
+  font-family: var(--font-mono);
+  font-size: clamp(0.65rem, 1.1vw, 0.85rem);
+  color: rgba(255,255,255,0.35);
+  margin-top: 1.2rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.scroll-indicator {
+  position: absolute;
+  bottom: 6%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.scroll-line {
+  width: 1px;
+  height: 50px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.4), rgba(255,255,255,0));
+  animation: scroll-pulse 2s ease-in-out infinite;
+}
+@keyframes scroll-pulse {
+  0%, 100% { opacity: 0.3; transform: scaleY(1); }
+  50% { opacity: 0.7; transform: scaleY(1.3); }
+}
+
 /* ==================== FILM INFO (top) ==================== */
 #film-info {
   position: fixed; top: 0; left: 0; right: 0;
   z-index: 20; text-align: center;
   padding: 1.8rem 2rem 0.5rem; pointer-events: none;
+  transition: opacity 0.4s ease;
 }
 #film-info-title {
   font-size: clamp(2.5rem, 6vw, 5rem); font-weight: 900;
@@ -99,29 +165,24 @@ html, body {
 #carousel-viewport {
   position: fixed;
   left: 0; right: 0;
-  /* Center vertically — shared across all breakpoints */
-  top: 75%;
-  transform: translateY(-50%);
+  top: 80%;
+  transform: translateY(-40%);
   height: var(--strip-height);
   z-index: 10;
   overflow: visible;
   cursor: grab;
-
-  /* THE KEY: single perspective for the entire 3D scene */
-  perspective: 2200px;
-  perspective-origin: 50% 42%;
+  perspective: 1400px;
+  perspective-origin: 50% 50%;
+  transition: opacity 0.4s ease;
 }
 #carousel-viewport:active { cursor: grabbing; }
 
-/* The cylinder that rotates */
 #carousel-cylinder {
   position: absolute;
   width: 0; height: 0;
-  /* Center the cylinder in the viewport */
   left: 50%;
   top: 50%;
   transform-style: preserve-3d;
-  /* Animated via JS: rotateX(tilt) rotateY(angle) */
   transition: none;
 }
 
@@ -130,13 +191,9 @@ html, body {
   position: absolute;
   width: var(--frame-width);
   height: var(--strip-height);
-  /* Center each segment on the cylinder origin */
   left: calc(var(--frame-width) / -2);
   top: calc(var(--strip-height) / -2);
-
-  /* 3D transform set by JS: rotateY(N) translateZ(R) */
   backface-visibility: hidden;
-
   display: flex;
   flex-direction: column;
   background: #2a2520;
@@ -147,7 +204,6 @@ html, body {
     0 2px 8px rgba(0,0,0,0.5);
 }
 
-/* Sprocket strips */
 .seg-sprocket {
   height: var(--sprocket-h);
   background: #2a2520;
@@ -168,7 +224,6 @@ html, body {
   box-shadow: inset 0 1px 2px rgba(0,0,0,0.8), 0 0 1px rgba(120,100,70,0.15);
 }
 
-/* The frame content area */
 .seg-frame {
   flex: 1;
   margin: 3px 4px;
@@ -178,7 +233,6 @@ html, body {
   border-radius: 2px;
   border: 1px solid rgba(0,0,0,0.5);
 }
-
 .seg-frame::after {
   content: '';
   position: absolute; inset: 0;
@@ -204,7 +258,6 @@ html, body {
   width: 100%; height: 100%; object-fit: cover;
 }
 
-/* Empty padding frames */
 .film-segment-empty {
   opacity: 0.5;
 }
@@ -221,7 +274,7 @@ html, body {
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   backdrop-filter: blur(8px);
-  transition: background 0.3s, border-color 0.3s, transform 0.2s;
+  transition: background 0.3s, border-color 0.3s, transform 0.2s, opacity 0.4s;
 }
 .nav-btn:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.25); }
 .nav-btn:active { transform: translateY(-50%) scale(0.92); }
@@ -232,6 +285,7 @@ html, body {
 #dot-indicators {
   position: fixed; bottom: 4%; left: 50%; transform: translateX(-50%);
   z-index: 20; display: flex; gap: 10px;
+  transition: opacity 0.4s ease;
 }
 .dot {
   width: 8px; height: 8px; border-radius: 50%;
@@ -251,6 +305,7 @@ html, body {
   position: fixed; bottom: 1%; left: 50%; transform: translateX(-50%);
   z-index: 15; font-family: var(--font-mono);
   font-size: 0.65rem; opacity: 0.15; letter-spacing: 0.1em; white-space: nowrap;
+  transition: opacity 0.4s ease;
 }
 
 /* ==================== RESPONSIVE ==================== */
@@ -265,7 +320,7 @@ html, body {
   #film-info-meta { font-size: 0.65rem; }
 
   #carousel-viewport {
-    top: 65%;
+    top: 80%;
     perspective: 2000px;
   }
 
@@ -280,6 +335,9 @@ html, body {
   .dot { width: 6px; height: 6px; }
 
   #credits-line { font-size: 0.5rem; }
+
+  .hero-title { font-size: clamp(2rem, 7vw, 3rem); }
+  #hero-overlay { padding: 0 6%; }
 }
 
 @media (max-width: 480px) {

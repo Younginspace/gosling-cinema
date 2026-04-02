@@ -9,15 +9,20 @@ import { films } from './sections.js';
  * After snapping to a clone, silently teleport rotation to the real frame.
  */
 
-const TILT_X = 6;
-const PAD = 2; // clone frames on each side
+const TILT_X = 10; // gentle tilt — keep front frame content visible
+const PAD = 5; // many clone frames for deep spiral visibility
 const N = films.length;
+let carouselActive = false;
+
+export function setCarouselActive(active) {
+  carouselActive = active;
+}
 
 function getArcParams() {
   const fw = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--frame-width'));
-  const angle = 28;
-  const minRadius = (fw + 20) / (2 * Math.sin(angle / 2 * Math.PI / 180));
-  return { angle, radius: Math.max(minRadius, 500) };
+  const angle = 22;  // tighter spacing = more frames visible in the arc
+  const minRadius = (fw + 16) / (2 * Math.sin(angle / 2 * Math.PI / 180));
+  return { angle, radius: Math.max(minRadius, 550) };
 }
 
 let ANGLE_PER_FRAME, ARC_RADIUS;
@@ -264,6 +269,7 @@ function snap() {
 }
 
 function onWheel(e) {
+  if (!carouselActive) return; // let page scroll through
   e.preventDefault();
   const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
   if (Math.abs(d) > 2) {
@@ -281,7 +287,37 @@ function onKey(e) {
 function tick() {
   const lerp = isDragging ? 0.35 : 0.08;
   currentRotation += (targetRotation - currentRotation) * lerp;
-  applyCylinderTransform(currentRotation);
+
+  // Only apply X tilt on cylinder — Y rotation is per-frame for spiral control
+  cylinderEl.style.transform = `rotateX(${TILT_X}deg)`;
+
+  // Per-frame spiral transforms
+  const frames = cylinderEl.children;
+  for (let i = 0; i < frames.length; i++) {
+    const baseAngle = i * ANGLE_PER_FRAME;
+    const worldAngle = baseAngle + currentRotation;
+
+    // Normalize to [-180, 180] to get distance from front-facing
+    let rel = worldAngle % 360;
+    if (rel > 180) rel -= 360;
+    if (rel < -180) rel += 360;
+
+    const t = Math.abs(rel) / 180; // 0 = front, 1 = back
+
+    // Film reel spiral: front frame is closest, frames curl away and up
+    const spiralRadius = ARC_RADIUS * (1 - t * 0.6);  // linear collapse for smooth recede
+    const spiralY = t * t * 250;                   // quadratic rise — steep at edges
+    const frameScale = Math.max(0.2, 1 - t * 0.7); // shrink to 30% at back
+    const frameOpacity = Math.max(0.02, Math.pow(1 - t, 2)); // quadratic fade
+
+    // Tilt back for receding frames
+    const tiltBack = t * 20;
+
+    frames[i].style.transform =
+      `rotateY(${worldAngle}deg) translateZ(${spiralRadius}px) translateY(${-spiralY}px) rotateX(${tiltBack}deg) scale(${frameScale})`;
+    frames[i].style.opacity = frameOpacity;
+  }
+
   requestAnimationFrame(tick);
 }
 

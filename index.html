@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
-<body>
-  <!-- CRT Boot Screen -->
+<body class="no-scroll">
+  <!-- CRT Boot Screen (HTML overlay — plays during model load) -->
   <div id="boot-screen">
     <div class="crt-overlay"></div>
     <div class="boot-content">
@@ -29,30 +29,44 @@
   <!-- Three.js Canvas (fixed background) -->
   <canvas id="webgl-canvas"></canvas>
 
+  <!-- Hero overlay (shown after camera reveal, fades on scroll) -->
+  <div id="hero-overlay" class="initially-hidden">
+    <div class="hero-text">
+      <h1 class="hero-title">A Ryan Gosling<br><em>Filmography</em></h1>
+      <p class="hero-sub">Scroll to Explore His Universe</p>
+    </div>
+    <div class="scroll-indicator">
+      <div class="scroll-line"></div>
+    </div>
+  </div>
+
   <!-- Film info overlay (top) -->
-  <div id="film-info">
+  <div id="film-info" class="initially-hidden">
     <h1 id="film-info-title"></h1>
     <p id="film-info-meta"></p>
   </div>
 
   <!-- 3D Film Strip Carousel -->
-  <div id="carousel-viewport">
+  <div id="carousel-viewport" class="initially-hidden">
     <div id="carousel-cylinder">
       <!-- frames injected by JS -->
     </div>
   </div>
 
   <!-- Navigation -->
-  <button id="nav-prev" class="nav-btn" aria-label="Previous">&larr;</button>
-  <button id="nav-next" class="nav-btn" aria-label="Next">&rarr;</button>
+  <button id="nav-prev" class="nav-btn initially-hidden" aria-label="Previous">&larr;</button>
+  <button id="nav-next" class="nav-btn initially-hidden" aria-label="Next">&rarr;</button>
 
   <!-- Dot indicators -->
-  <div id="dot-indicators"></div>
+  <div id="dot-indicators" class="initially-hidden"></div>
 
   <!-- Credits line -->
-  <div id="credits-line">
+  <div id="credits-line" class="initially-hidden">
     Built with Three.js + GSAP &middot; A Ryan Gosling Story
   </div>
+
+  <!-- Scroll spacer (provides scrollable height — all visible content is fixed) -->
+  <div id="scroll-spacer"></div>
 
   <script type="module" src="/src/main.js"></script>
 </body>
