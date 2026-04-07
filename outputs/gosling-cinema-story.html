@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gosling Cinema — 一次从录屏开始的 Vibe Coding 复盘</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
+  <meta property="og:title" content="Gosling Cinema — 一次从录屏开始的 Vibe Coding 复盘">
+  <meta property="og:description" content="7天，2个commit，5部高司令电影，一个复古CRT胶卷滚动体验。从 shader.se 的灵感到 Three.js + Lenis + CSS 3D 的落地。">
+  <meta property="og:type" content="article">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=JetBrains+Mono:wght@400;600&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&display=swap');
+
+    :root {
+      --bg: #faf8f5;
+      --bg-dark: #f0ece6;
+      --text: #2c2420;
+      --text-2: #5a524a;
+      --text-3: #9a928a;
+      --accent: #e84393;
+      --accent-2: #6c5ce7;
+      --accent-3: #e17055;
+      --code-bg: #1a1520;
+      --code-text: #e0d8d0;
+      --serif: 'Noto Serif SC', 'Playfair Display', Georgia, serif;
+      --mono: 'JetBrains Mono', 'Courier New', monospace;
+      --max-w: 720px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html {
+      font-size: 17px;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--serif);
+      line-height: 1.85;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ---- Hero ---- */
+    .hero {
+      min-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 4rem 2rem;
+      background: linear-gradient(180deg, #0a0a2e 0%, #1a0a3e 40%, #2d1045 70%, var(--bg) 100%);
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(0deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 3px);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 2rem;
+    }
+
+    .hero h1 {
+      font-family: 'Playfair Display', var(--serif);
+      font-size: clamp(2.8rem, 7vw, 4.5rem);
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(135deg, #fff 0%, #e84393 50%, #6c5ce7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      font-size: 1.1rem;
+      color: rgba(255,255,255,0.55);
+      max-width: 500px;
+      line-height: 1.7;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 3rem;
+      margin-top: 3rem;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.35);
+      letter-spacing: 0.05em;
+    }
+
+    .hero-stats strong {
+      display: block;
+      font-size: 1.8rem;
+      color: rgba(255,255,255,0.8);
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+    }
+
+    /* ---- Content ---- */
+    .content {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 3rem 1.5rem 5rem;
+    }
+
+    h2 {
+      font-family: 'Playfair Display', var(--serif);
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin: 3.5rem 0 1.2rem;
+      color: var(--text);
+      position: relative;
+    }
+
+    h2::before {
+      content: '';
+      display: block;
+      width: 40px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      margin-bottom: 0.8rem;
+      border-radius: 2px;
+    }
+
+    h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin: 2rem 0 0.8rem;
+      color: var(--text);
+    }
+
+    p {
+      margin-bottom: 1.2rem;
+      color: var(--text-2);
+    }
+
+    blockquote {
+      border-left: 3px solid var(--accent);
+      padding: 1rem 1.5rem;
+      margin: 1.5rem 0;
+      background: var(--bg-dark);
+      border-radius: 0 8px 8px 0;
+      font-style: italic;
+      color: var(--text-2);
+    }
+
+    blockquote cite {
+      display: block;
+      font-style: normal;
+      font-size: 0.8rem;
+      color: var(--text-3);
+      margin-top: 0.5rem;
+      font-family: var(--mono);
+    }
+
+    code {
+      font-family: var(--mono);
+      font-size: 0.85em;
+      background: var(--bg-dark);
+      padding: 0.15em 0.4em;
+      border-radius: 4px;
+      color: var(--accent-2);
+    }
+
+    pre {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.2rem 1.5rem;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      line-height: 1.7;
+      margin: 1.2rem 0;
+    }
+
+    /* ---- Cards ---- */
+    .insight-card {
+      background: #fff;
+      border: 1px solid rgba(0,0,0,0.06);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1.2rem 0;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    }
+
+    .insight-card h4 {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      margin-bottom: 0.6rem;
+    }
+
+    /* ---- Timeline ---- */
+    .timeline {
+      position: relative;
+      padding-left: 2rem;
+      margin: 1.5rem 0;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(180deg, var(--accent), var(--accent-2), var(--accent-3));
+      border-radius: 1px;
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 1.5rem;
+      padding-left: 1rem;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -2.35rem;
+      top: 0.6rem;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid var(--bg);
+    }
+
+    .timeline-date {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--text-3);
+      letter-spacing: 0.05em;
+    }
+
+    .timeline-text {
+      color: var(--text-2);
+      margin-top: 0.3rem;
+    }
+
+    /* ---- Architecture diagram ---- */
+    .arch-diagram {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 1.5rem 2rem;
+      border-radius: 10px;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      line-height: 1.8;
+      overflow-x: auto;
+      margin: 1.2rem 0;
+    }
+
+    .arch-diagram .highlight {
+      color: var(--accent);
+    }
+
+    .arch-diagram .dim {
+      color: rgba(224, 216, 208, 0.4);
+    }
+
+    /* ---- Film strip decoration ---- */
+    .film-strip {
+      display: flex;
+      gap: 0.8rem;
+      overflow-x: auto;
+      padding: 1rem 0;
+      margin: 1.5rem 0;
+      scrollbar-width: none;
+    }
+
+    .film-strip::-webkit-scrollbar { display: none; }
+
+    .film-chip {
+      flex-shrink: 0;
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: #fff;
+      white-space: nowrap;
+    }
+
+    /* ---- Tech table ---- */
+    .tech-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+    }
+
+    .tech-table th {
+      text-align: left;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-3);
+      padding: 0.5rem 0;
+      border-bottom: 2px solid var(--bg-dark);
+    }
+
+    .tech-table td {
+      padding: 0.6rem 0;
+      border-bottom: 1px solid var(--bg-dark);
+      color: var(--text-2);
+    }
+
+    .tech-table td:first-child {
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    /* ---- Footer ---- */
+    .footer {
+      text-align: center;
+      padding: 3rem 1.5rem;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--text-3);
+      letter-spacing: 0.05em;
+    }
+
+    .footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 600px) {
+      html { font-size: 15px; }
+      .hero-stats { gap: 1.5rem; }
+      .hero-stats strong { font-size: 1.4rem; }
+      .content { padding: 2rem 1rem 4rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ==================== HERO ==================== -->
+<section class="hero">
+  <div class="hero-badge">Vibe Coding Retrospect</div>
+  <h1>Gosling Cinema</h1>
+  <a href="https://gosling.savemoss.com" target="_blank" style="display: inline-block; margin-bottom: 1rem; font-family: var(--mono); font-size: 0.85rem; color: var(--accent); text-decoration: none; border: 1px solid rgba(232,67,147,0.3); padding: 0.4em 1.2em; border-radius: 6px; letter-spacing: 0.05em; transition: all 0.3s;">gosling.savemoss.com</a>
+  <p class="hero-sub">
+    从 shader.se 的一段录屏出发，用 7 天做了一个复古 CRT 电影胶卷滚动体验——致敬 Ryan Gosling 的五部代表作。
+  </p>
+  <div class="hero-stats">
+    <div><strong>7</strong>天</div>
+    <div><strong>5</strong>部电影</div>
+    <div><strong>4</strong>层 Shader</div>
+    <div><strong>$0</strong>成本</div>
+  </div>
+</section>
+
+<!-- ==================== CONTENT ==================== -->
+<div class="content">
+
+  <!-- ---- Origin ---- -->
+  <h2>起源：一段录屏和一个念头</h2>
+
+  <p>
+    故事开始于一个网站——<strong><a href="https://shader.se" target="_blank" style="color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent);">shader.se</a></strong>。一家瑞典创意开发工作室的作品集，用复古 CRT 启动画面引导进入一条 3D 胶卷，每一帧是他们的一个项目。点击旋转、滚动切换，整个交互充满电影感。
+  </p>
+
+  <p>
+    看到的第一秒就觉得：这种胶卷形式太适合做演员作品集了。正好最近因为《挽救计划》电影对 Ryan Gosling 印象深刻——从 <em>Drive</em> 的沉默暴力美学，到 <em>Blade Runner 2049</em> 的赛博孤独，再到 <em>La La Land</em> 的浪漫失落，<em>Barbie</em> 的荒诞幽默，直到 <em>Project Hail Mary</em> 的星际热血——五部电影，五种完全不同的视觉风格，天然适合用不同的 shader 来呈现。
+  </p>
+
+  <blockquote>
+    "先行动，从被激发灵感的创意开始。创意是原创-复刻融合微创新的螺旋上升。"
+    <cite>— 开发者</cite>
+  </blockquote>
+
+  <p>
+    于是打开终端，<code>npm create vite@latest</code>，项目名敲下 <code>gosling-cinema</code>。
+  </p>
+
+  <!-- ---- Films ---- -->
+  <div class="film-strip">
+    <div class="film-chip" style="background: linear-gradient(135deg, #e84393, #0a0a2e);">Drive (2011)</div>
+    <div class="film-chip" style="background: linear-gradient(135deg, #e17055, #1a0a00);">Blade Runner 2049 (2017)</div>
+    <div class="film-chip" style="background: linear-gradient(135deg, #6c5ce7, #0d0030);">La La Land (2016)</div>
+    <div class="film-chip" style="background: linear-gradient(135deg, #fd79a8, #2d0020);">Barbie (2023)</div>
+    <div class="film-chip" style="background: linear-gradient(135deg, #74b9ff, #020810);">Project Hail Mary (2026)</div>
+  </div>
+
+  <!-- ---- Key Moment 1 ---- -->
+  <h2>眼前一亮：当 AI 看懂了录屏</h2>
+
+  <p>
+    最初的尝试是截图。把 shader.se 的几个关键画面截下来喂给 AI："帮我做一个类似的效果。" 结果还原度很低——截图丢失了太多信息：动画的节奏、过渡的缓动曲线、滚动的手感、元素之间的时序关系……这些在静态图片里全部消失了。
+  </p>
+
+  <p>
+    转机来自一个工具。朋友推荐了 <strong>AnyCap CLI</strong>，可以用 Gemini 理解视频内容。于是录了 shader.se 的操作录屏，让 Gemini 分析，生成了详细的逐帧文字描述：
+  </p>
+
+  <div class="insight-card">
+    <h4>AnyCap 生成的分析片段</h4>
+    <p style="margin-bottom: 0; font-size: 0.9rem;">
+      "用户向下滚动时，无缝过渡：3D 电脑环境向上消退，一条弯曲的 3D 胶卷条从底部滚入视野。胶卷条在 3D 空间中弯曲，向观众方向'包裹'制造纵深感。垂直滚动 → 胶卷水平移动（联动滚动），有'加权'感，停止滚动时有 ease-in/ease-out，精确对齐到帧。"
+    </p>
+  </div>
+
+  <p>
+    把这份分析文档作为 prompt 喂给 Claude Code，效果截然不同。AI 理解了"镜头推进→胶卷旋转"的动态关系，做出了虽然不完全还原 shader.se、但"另一种效果还行"的交互方案——3D 旋转木马替代了直线胶卷，反而有了更强的深度感。
+  </p>
+
+  <div class="insight-card">
+    <h4>Lesson Learned</h4>
+    <p style="margin-bottom: 0;">
+      对于动态交互效果，<strong>视频 &gt; 截图</strong>。录屏里包含了时序、缓动、物理感这些截图完全无法传达的信息。用 AI 理解录屏后生成的描述，比截图准确一个量级。
+    </p>
+  </div>
+
+  <!-- ---- Key Moment 2 ---- -->
+  <h2>感动时刻：真实素材跑通了</h2>
+
+  <p>
+    技术框架搭好后，胶卷帧里放的还是空白占位符——灰色方块配着 <code>DRIVE (2011)</code> 的小字。效果可以验证，但感觉像是在看一个骨架。
+  </p>
+
+  <p>
+    然后开始找真实视频素材。从 YouTube 上找到每部电影的片段，用工具下载，剪辑成经典镜头，放进 <code>asset/</code> 文件夹。<code>&lt;video&gt;</code> 标签嵌入胶卷帧，<code>loop muted playsInline</code>，刷新本地预览——
+  </p>
+
+  <p>
+    Drive 的霓虹粉红夜街画面在胶卷里循环播放，bloom shader 让灯光溢出画面边缘。向右滚，Blade Runner 2049 的橙色沙暴铺满视野，chromatic aberration 让画面微微错位。再滚，La La Land 的星空下两个人跳舞，深紫色的 tint 笼罩一切……
+  </p>
+
+  <blockquote>
+    把真实视频素材放进 asset 文件夹，在本地预览成功的那一刻——是整个项目最有成就感的时刻。
+    <cite>— 开发者</cite>
+  </blockquote>
+
+  <p>
+    从骨架到血肉，只差了"真实内容"这一步。但这一步带来的感受差异是巨大的。
+  </p>
+
+  <!-- ---- Architecture ---- -->
+  <h2>技术架构：三层滚动</h2>
+
+  <p>
+    整个体验的核心是把一个 <code>300vh</code> 的滚动距离映射成三个阶段：
+  </p>
+
+  <div class="arch-diagram">
+    <span class="dim">scroll: 0%</span><br>
+    <span class="dim">│</span><br>
+    <span class="dim">├── 0-25%</span> &nbsp; <span class="highlight">Hero 阶段</span><br>
+    <span class="dim">│</span> &nbsp; &nbsp; &nbsp; 标题 "A Ryan Gosling Filmography" 可见<br>
+    <span class="dim">│</span> &nbsp; &nbsp; &nbsp; 3D Commodore PET 电脑静止<br>
+    <span class="dim">│</span> &nbsp; &nbsp; &nbsp; CRT 屏幕闪烁 "GOSLING" logo<br>
+    <span class="dim">│</span><br>
+    <span class="dim">├── 25-70%</span> &nbsp; <span class="highlight">过渡阶段</span><br>
+    <span class="dim">│</span> &nbsp; &nbsp; &nbsp; 镜头两阶段推进：缓慢靠近 → 加速冲入屏幕<br>
+    <span class="dim">│</span> &nbsp; &nbsp; &nbsp; 电脑模型在 35%-75% 之间淡出<br>
+    <span class="dim">│</span> &nbsp; &nbsp; &nbsp; Carousel UI 在 20%-80% 之间渐显<br>
+    <span class="dim">│</span><br>
+    <span class="dim">└── 70-100%</span> &nbsp; <span class="highlight">Carousel 阶段</span><br>
+    &nbsp; &nbsp; &nbsp; &nbsp; 滚轮驱动 3D 胶卷旋转木马<br>
+    &nbsp; &nbsp; &nbsp; &nbsp; 切换电影 → shader 参数 lerp 过渡<br>
+    &nbsp; &nbsp; &nbsp; &nbsp; 视频自动播放<br>
+    <span class="dim">scroll: 100%</span>
+  </div>
+
+  <h3>后处理管线</h3>
+
+  <p>
+    Five-pass 后处理链，每一层叠加不同的视觉效果：
+  </p>
+
+  <pre>RenderPass → UnrealBloomPass → DistortionShader → FilmShader → OutputPass
+                │                    │                  │
+            光晕溢出            鼠标液态扭曲      胶片颗粒/扫描线/暗角/色散/色调</pre>
+
+  <p>
+    设计决策：每部电影有独立的 6 个 shader 参数，切换时用 <code>lerp(current, target, 3.0 * dt)</code> 平滑过渡。说实话视觉上差异不算特别明显，但细看能感受到——Drive 的 bloom 是 1.5（霓虹溢出感），Barbie 只有 1.0（明亮但不刺眼）；Blade Runner 的 noise 是 0.2（粗糙胶片质感），La La Land 只有 0.06（干净浪漫）。
+  </p>
+
+  <h3>Tech Stack</h3>
+
+  <table class="tech-table">
+    <thead>
+      <tr><th>Layer</th><th>Choice</th><th>Why</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>构建</td><td>Vite 8</td><td>零配置，HMR 快</td></tr>
+      <tr><td>3D</td><td>Three.js</td><td>WebGL + GLTF 加载 + 后处理</td></tr>
+      <tr><td>滚动</td><td>Lenis</td><td>自定义缓动曲线的平滑滚动</td></tr>
+      <tr><td>动画</td><td>GSAP</td><td>UI 文字过渡</td></tr>
+      <tr><td>Shader</td><td>原生 GLSL</td><td>Film grain + distortion</td></tr>
+      <tr><td>模型</td><td>Commodore PET GLB</td><td>复古电脑，契合 CRT 主题</td></tr>
+      <tr><td>部署</td><td>EdgeSpark</td><td>快速后端+部署，易上手，免费</td></tr>
+    </tbody>
+  </table>
+
+  <!-- ---- Timeline ---- -->
+  <h2>开发时间线</h2>
+
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="timeline-date">Day 1 — 2026-04-01</div>
+      <div class="timeline-text">
+        录屏分析 shader.se。用 AnyCap CLI + Gemini 生成视觉描述文档。搭建 Vite + Three.js 项目骨架。CRT boot 序列、3D 模型加载、基础后处理管线、Lenis 滚动全部跑通。第一个 commit。
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-date">Day 2 — 2026-04-02</div>
+      <div class="timeline-text">
+        修复加载流程（boot screen 和 3D 场景的时序问题）、carousel 位置调整、模型布局微调。录制当前状态录屏做第二轮分析。下载电影视频素材。第二个 commit。
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-date">Day 3 — 2026-04-03</div>
+      <div class="timeline-text">
+        scene.js 大改：完善镜头双阶段推进动画，优化 shader 参数，模型淡出时机调整。
+      </div>
+    </div>
+    <div class="timeline-item" style="opacity: 0.5;">
+      <div class="timeline-date">Day 4-6</div>
+      <div class="timeline-text">间歇性调优，主要精力在其他项目上。</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-date">Day 7 — 2026-04-07</div>
+      <div class="timeline-text">
+        Carousel 交互最终调优：滚轮灵敏度、snap 对齐逻辑、视频播放控制。Style 响应式适配。Sections 数据更新为 GitHub Releases 视频源。
+      </div>
+    </div>
+  </div>
+
+  <!-- ---- Collaboration ---- -->
+  <h2>人机协作：录屏驱动的 Vibe Coding</h2>
+
+  <p>
+    这个项目的协作模式有一个鲜明特点：<strong>录屏是核心素材，不是截图</strong>。
+  </p>
+
+  <p>
+    传统的"给 AI 看截图让它写代码"在处理动态交互时有天然缺陷。截图是时间的切片，丢失了动画、过渡、物理感这些构成"体验"的核心元素。而这个项目的目标恰恰就是体验——不是做一个静态页面，而是做一个"有手感"的滚动交互。
+  </p>
+
+  <p>
+    解决方案是引入 <strong>AnyCap CLI</strong> 作为中间层：
+  </p>
+
+  <pre>录屏 (mp4) → AnyCap + Gemini → 结构化描述 (md) → Claude Code → 代码</pre>
+
+  <p>
+    这条管线把"我想要这种效果"从模糊的视觉印象转化成了精确的技术规格。比如 AnyCap 分析出的"有加权感，停止滚动时有 ease-in/ease-out"直接对应了 Lenis 的 <code>easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t))</code>。
+  </p>
+
+  <div class="insight-card">
+    <h4>协作模式</h4>
+    <p style="margin-bottom: 0;">
+      不是"看截图抄作业"，而是"看录屏理解意图，然后做出自己的版本"。最终产出的 3D 旋转木马和 shader.se 的直线胶卷长得完全不一样——但那种电影感和沉浸感是对的。
+    </p>
+  </div>
+
+  <!-- ---- Pitfalls ---- -->
+  <h2>踩过的坑</h2>
+
+  <h3>1. Blender 模型的法语命名</h3>
+  <p>
+    Commodore PET 2001 的 GLB 模型来自社区创作者（法国人）。<code>traverse</code> 模型时发现屏幕网格叫 <code>Plan_7</code>，玻璃叫 <code>vitre</code>——如果不打印所有 mesh 名称，根本找不到需要替换材质的部分。
+  </p>
+
+  <h3>2. CRT Boot 的时序问题</h3>
+  <p>
+    Boot screen 是 HTML overlay，3D 场景在下面异步加载。如果 boot 动画播完时 3D 场景还没准备好，就会看到一帧空白。解决方案：boot 完成时不直接淡出，而是先 <code>await filmScene.ready</code>，确认模型加载完毕、第一帧渲染完成后，再 <code>fadeOut()</code>。
+  </p>
+
+  <h3>3. 无限循环 Carousel 的旋转漂移</h3>
+  <p>
+    用户连续滚动时，<code>targetRotation</code> 会无限累加。虽然 <code>%360</code> 可以归一化角度，但 clone 帧的数量有限（PAD=5），角度超过克隆范围就会穿帮。最终方案：<code>scheduleNormalize()</code>——在动画稳定 500ms 后检测累计漂移，如果超过一整圈就瞬移回标准位置。
+  </p>
+
+  <!-- ---- Lessons ---- -->
+  <h2>收获</h2>
+
+  <div class="insight-card">
+    <h4>01 — 先行动</h4>
+    <p style="margin-bottom: 0;">
+      看到 shader.se 被击中的那一刻就开始动手。不必等到完美方案，创意本身就是螺旋上升的——先复刻，再理解，最后变成自己的东西。
+    </p>
+  </div>
+
+  <div class="insight-card">
+    <h4>02 — 不完全还原也是一种成功</h4>
+    <p style="margin-bottom: 0;">
+      3D 旋转木马和 shader.se 的直线胶卷长得完全不一样。但"另一种效果还行"比"完美复刻"更有价值——它变成了你自己的作品，而不是别人的翻版。
+    </p>
+  </div>
+
+  <div class="insight-card">
+    <h4>03 — 真实内容是魔法</h4>
+    <p style="margin-bottom: 0;">
+      占位符和真实视频素材之间的差距，不是技术差距，是情感差距。当 Drive 的霓虹夜街在 bloom shader 里溢出光晕的那一刻，这个项目从"技术 demo"变成了"作品"。
+    </p>
+  </div>
+
+  <div class="insight-card">
+    <h4>04 — CRT Boot 不只是装饰</h4>
+    <p style="margin-bottom: 0;">
+      它掩盖了 3D 模型和视频的加载时间，把等待变成了体验的一部分。好的 loading 不是进度条，是叙事。
+    </p>
+  </div>
+
+  <div class="insight-card">
+    <h4>05 — Shader 参数是最低成本的氛围切换</h4>
+    <p style="margin-bottom: 0;">
+      6 个浮点数（bloom, chromatic, noise, vignette, scanline, sepia）+ 3 个 tint 值，就能让同一个画面从霓虹朋克变成赛博荒漠。改参数比改模型、改灯光便宜一百倍。
+    </p>
+  </div>
+
+</div>
+
+<!-- ==================== FOOTER ==================== -->
+<div class="footer">
+  Gosling Cinema &middot; Built with Three.js + Lenis + GSAP &middot; 2026<br>
+  <a href="https://gosling.savemoss.com" target="_blank">gosling.savemoss.com</a> &middot; <a href="https://github.com/Younginspace/gosling-cinema" target="_blank">GitHub</a><br><br>
+  Generated by Vibe Retrospect
+</div>
+
+</body>
+</html>

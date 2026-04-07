@@ -38,7 +38,7 @@ export function initBootScreen(onReady, onUpdate) {
       if (onUpdate) onUpdate([...displayed], 1, 'Ready.');
 
       // Messages done — hand control to caller; they decide when to fade
-      setTimeout(() => onReady(fadeOut), 200);
+      setTimeout(() => onReady(fadeOut), 50);
       return;
     }
 

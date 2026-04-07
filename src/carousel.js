@@ -39,6 +39,7 @@ let lastDragTime = 0;
 let onChangeCallback = null;
 let cylinderEl = null;
 let clickBlocked = false;
+let activeVideoElements = []; // track all video elements per film index
 
 export function initCarousel(filmScene) {
   const viewport = document.getElementById('carousel-viewport');
@@ -63,6 +64,7 @@ export function initCarousel(filmScene) {
     filmScene.setTargetEffects(film.effects, film.tint, hexToRgb(film.bgColor));
     updateInfo(index);
     updateDots(index);
+    playFilmVideo(index);
   };
   onChangeCallback(0);
 
@@ -96,15 +98,31 @@ function buildFrames() {
     const angle = j * ANGLE_PER_FRAME;
     segment.style.transform = `rotateY(${angle}deg) translateZ(${ARC_RADIUS}px)`;
 
+    const video = document.createElement('video');
+    video.src = Array.isArray(film.video)
+      ? film.video[Math.floor(Math.random() * film.video.length)]
+      : film.video;
+    video.loop = true;
+    video.muted = true; // start muted for autoplay policy
+    video.playsInline = true;
+    video.preload = 'metadata';
+    video.className = 'seg-video';
+    video.disableRemotePlayback = true;
+    video.setAttribute('controlslist', 'noplaybackrate nodownload nofullscreen');
+    video.setAttribute('disablepictureinpicture', '');
+
+    // Track video elements by film index for play/pause control
+    if (!activeVideoElements[filmIndex]) activeVideoElements[filmIndex] = [];
+    activeVideoElements[filmIndex].push(video);
+
     segment.innerHTML = `
       <div class="seg-sprocket">${sprocketRow()}</div>
       <div class="seg-frame">
-        <div class="seg-poster">
-          <div class="poster-placeholder">[ ${film.name} ]<br>public/images/${film.id}.jpg</div>
-        </div>
+        <div class="seg-poster"></div>
       </div>
       <div class="seg-sprocket">${sprocketRow()}</div>
     `;
+    segment.querySelector('.seg-poster').appendChild(video);
 
     // Click navigates to this film (use the real index)
     const clickIndex = filmIndex;
@@ -160,6 +178,55 @@ function updateInfo(index) {
 
 function updateDots(index) {
   document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === index));
+}
+
+/**
+ * Video playback control — play active film's videos, pause all others.
+ * Unmutes after first user interaction (click/touch/key).
+ */
+let videoUnmuted = false;
+
+function playFilmVideo(index) {
+  // Pause all videos
+  for (let i = 0; i < N; i++) {
+    if (!activeVideoElements[i]) continue;
+    for (const v of activeVideoElements[i]) {
+      v.pause();
+      v.currentTime = 0;
+    }
+  }
+  // Play active film's videos (both real and clone frames)
+  if (!activeVideoElements[index]) return;
+  for (const v of activeVideoElements[index]) {
+    v.muted = !videoUnmuted;
+    v.play().catch(() => {}); // ignore if blocked by browser
+  }
+}
+
+function setMuteState(muted) {
+  videoUnmuted = !muted;
+  if (!activeVideoElements[currentIndex]) return;
+  for (const v of activeVideoElements[currentIndex]) {
+    v.muted = muted;
+  }
+  updateMuteIcon();
+}
+
+function updateMuteIcon() {
+  const iconMuted = document.getElementById('icon-muted');
+  const iconUnmuted = document.getElementById('icon-unmuted');
+  if (!iconMuted || !iconUnmuted) return;
+  iconMuted.style.display = videoUnmuted ? 'none' : 'block';
+  iconUnmuted.style.display = videoUnmuted ? 'block' : 'none';
+}
+
+// Mute button click
+const muteBtn = document.getElementById('mute-btn');
+if (muteBtn) {
+  muteBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    setMuteState(videoUnmuted);
+  });
 }
 
 /**

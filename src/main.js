@@ -50,7 +50,7 @@ lenis.on('scroll', ({ scroll, limit }) => {
 
   // Carousel elements visibility
   const carouselT = Math.max(0, (scroll - heroEnd) / (transEnd - heroEnd));
-  const ids = ['carousel-viewport', 'film-info', 'nav-prev', 'nav-next', 'dot-indicators', 'credits-line'];
+  const ids = ['carousel-viewport', 'film-info', 'nav-prev', 'nav-next', 'dot-indicators', 'credits-line', 'mute-btn'];
   for (const id of ids) {
     const el = document.getElementById(id);
     if (!el) continue;

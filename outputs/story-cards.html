@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gosling Cinema — Story Cards</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=JetBrains+Mono:wght@400;600&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&display=swap');
+
+    :root {
+      --bg: #faf8f5;
+      --bg-dark: #f0ece6;
+      --text: #2c2420;
+      --text-2: #5a524a;
+      --text-3: #9a928a;
+      --accent: #e84393;
+      --accent-2: #6c5ce7;
+      --accent-3: #e17055;
+      --serif: 'Noto Serif SC', 'Playfair Display', Georgia, serif;
+      --sans: 'Noto Serif SC', -apple-system, BlinkMacSystemFont, sans-serif;
+      --mono: 'JetBrains Mono', 'Courier New', monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #e0dbd5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+      padding: 40px 0;
+      font-family: var(--sans);
+    }
+
+    .card {
+      width: 1080px;
+      height: 1350px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg);
+      flex-shrink: 0;
+    }
+
+    .card-inner {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 60px 80px 40px;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      padding: 0 80px 48px;
+      font-family: var(--mono);
+      font-size: 22px;
+      color: var(--text-3);
+    }
+
+    /* ---- Typography ---- */
+    .card h1 {
+      font-family: 'Playfair Display', var(--serif);
+      color: var(--text);
+      line-height: 1.1;
+    }
+
+    .card h2 {
+      font-family: 'Playfair Display', var(--serif);
+      font-size: 44px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 28px;
+      line-height: 1.2;
+    }
+
+    .card h2::before {
+      content: '';
+      display: block;
+      width: 50px;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      margin-bottom: 20px;
+      border-radius: 2px;
+    }
+
+    .card p {
+      font-size: 26px;
+      line-height: 1.75;
+      color: var(--text-2);
+    }
+
+    .card blockquote {
+      border-left: 4px solid var(--accent);
+      padding: 24px 32px;
+      margin: 24px 0;
+      background: var(--bg-dark);
+      border-radius: 0 12px 12px 0;
+      font-style: italic;
+      font-size: 26px;
+      line-height: 1.7;
+      color: var(--text-2);
+    }
+
+    .card blockquote cite {
+      display: block;
+      font-style: normal;
+      font-size: 20px;
+      color: var(--text-3);
+      margin-top: 12px;
+      font-family: var(--mono);
+    }
+
+    .badge {
+      font-family: var(--mono);
+      font-size: 20px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-3);
+    }
+
+    .accent { color: var(--accent); }
+    .accent-2 { color: var(--accent-2); }
+
+    /* ==================== CARD 1: COVER ==================== */
+    #card-1 {
+      background: linear-gradient(170deg, #0a0a2e 0%, #1a0a3e 40%, #2d1045 75%, #3d1550 100%);
+      color: #fff;
+      position: relative;
+    }
+
+    #card-1::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px);
+      pointer-events: none;
+    }
+
+    #card-1 .card-inner {
+      align-items: center;
+      text-align: center;
+      gap: 20px;
+    }
+
+    #card-1 .badge {
+      color: rgba(255,255,255,0.35);
+    }
+
+    #card-1 h1 {
+      font-size: 86px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #fff 0%, #e84393 50%, #6c5ce7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin: 20px 0;
+    }
+
+    #card-1 .subtitle {
+      font-size: 28px;
+      color: rgba(255,255,255,0.5);
+      max-width: 700px;
+      line-height: 1.65;
+    }
+
+    .stats-row {
+      display: flex;
+      gap: 60px;
+      margin-top: 40px;
+      font-family: var(--mono);
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-num {
+      font-size: 52px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.85);
+      display: block;
+    }
+
+    .stat-label {
+      font-size: 20px;
+      color: rgba(255,255,255,0.35);
+      letter-spacing: 0.08em;
+    }
+
+    #card-1 .card-footer {
+      color: rgba(255,255,255,0.2);
+    }
+
+    .film-chips {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 32px;
+    }
+
+    .film-chip {
+      padding: 10px 22px;
+      border-radius: 8px;
+      font-family: var(--mono);
+      font-size: 20px;
+      color: #fff;
+      white-space: nowrap;
+    }
+
+    /* ==================== CARD 2: ORIGIN ==================== */
+    #card-2 .origin-highlight {
+      background: var(--bg-dark);
+      border-radius: 12px;
+      padding: 28px 32px;
+      margin-top: 20px;
+    }
+
+    #card-2 .origin-highlight p {
+      font-size: 24px;
+      margin: 0;
+    }
+
+    #card-2 .origin-label {
+      font-family: var(--mono);
+      font-size: 18px;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    /* ==================== CARD 3: DECISIONS ==================== */
+    .decision-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .decision-row {
+      display: flex;
+      gap: 20px;
+      align-items: stretch;
+    }
+
+    .decision-box {
+      flex: 1;
+      padding: 24px 28px;
+      border-radius: 12px;
+      background: var(--bg-dark);
+    }
+
+    .decision-box.rejected {
+      opacity: 0.45;
+      position: relative;
+    }
+
+    .decision-box.rejected::after {
+      content: '';
+      position: absolute;
+      left: 20px;
+      right: 20px;
+      top: 50%;
+      height: 2px;
+      background: var(--text-3);
+    }
+
+    .decision-box.chosen {
+      border: 2px solid var(--accent);
+      background: rgba(232, 67, 147, 0.04);
+    }
+
+    .decision-label {
+      font-family: var(--mono);
+      font-size: 17px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 8px;
+    }
+
+    .decision-label.pass { color: var(--text-3); }
+    .decision-label.go { color: var(--accent); }
+
+    .decision-text {
+      font-size: 23px;
+      line-height: 1.55;
+      color: var(--text-2);
+    }
+
+    .decision-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 16px;
+      font-family: var(--serif);
+    }
+
+    /* ==================== CARD 4: TIMELINE ==================== */
+    .tl {
+      position: relative;
+      padding-left: 36px;
+    }
+
+    .tl::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 8px;
+      bottom: 8px;
+      width: 3px;
+      background: linear-gradient(180deg, var(--accent), var(--accent-2), var(--accent-3));
+      border-radius: 2px;
+    }
+
+    .tl-item {
+      position: relative;
+      margin-bottom: 32px;
+    }
+
+    .tl-item:last-child { margin-bottom: 0; }
+
+    .tl-item::before {
+      content: '';
+      position: absolute;
+      left: -42px;
+      top: 8px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 3px solid var(--bg);
+    }
+
+    .tl-date {
+      font-family: var(--mono);
+      font-size: 20px;
+      color: var(--text-3);
+      letter-spacing: 0.04em;
+    }
+
+    .tl-text {
+      font-size: 24px;
+      line-height: 1.6;
+      color: var(--text-2);
+      margin-top: 6px;
+    }
+
+    .tl-item.dimmed { opacity: 0.4; }
+
+    /* ==================== CARD 5: METHOD ==================== */
+    .method-flow {
+      background: #1a1520;
+      color: #e0d8d0;
+      border-radius: 12px;
+      padding: 28px 32px;
+      font-family: var(--mono);
+      font-size: 22px;
+      line-height: 2;
+      margin-bottom: 28px;
+    }
+
+    .method-flow .hl { color: var(--accent); }
+
+    .rule-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .rule-card {
+      border-left: 4px solid var(--accent-2);
+      padding: 18px 24px;
+      background: var(--bg-dark);
+      border-radius: 0 10px 10px 0;
+    }
+
+    .rule-num {
+      font-family: var(--mono);
+      font-size: 18px;
+      color: var(--accent-2);
+      letter-spacing: 0.1em;
+      margin-bottom: 4px;
+    }
+
+    .rule-text {
+      font-size: 24px;
+      line-height: 1.55;
+      color: var(--text-2);
+    }
+
+    /* ==================== CARD 6: LESSONS ==================== */
+    .lesson-items {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .lesson-item {
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+    }
+
+    .lesson-num {
+      font-family: var(--mono);
+      font-size: 48px;
+      font-weight: 700;
+      color: var(--bg-dark);
+      -webkit-text-stroke: 1.5px var(--accent);
+      line-height: 1;
+      flex-shrink: 0;
+      width: 60px;
+      text-align: right;
+    }
+
+    .lesson-body h4 {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .lesson-body p {
+      font-size: 23px;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    /* ==================== CARD 7: CLOSING ==================== */
+    #card-7 {
+      background: linear-gradient(170deg, #0a0a2e 0%, #1a0a3e 50%, #2d1045 100%);
+      color: #fff;
+    }
+
+    #card-7 .card-inner {
+      align-items: center;
+      text-align: center;
+      gap: 28px;
+    }
+
+    .closing-divider {
+      width: 60px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      margin: 12px 0;
+    }
+
+    #card-7 blockquote {
+      border-left: none;
+      background: rgba(255,255,255,0.04);
+      text-align: center;
+      border-radius: 12px;
+      font-size: 30px;
+      color: rgba(255,255,255,0.7);
+      max-width: 800px;
+      padding: 36px 48px;
+    }
+
+    #card-7 blockquote cite {
+      color: rgba(255,255,255,0.3);
+    }
+
+    .closing-sub {
+      font-size: 24px;
+      color: rgba(255,255,255,0.35);
+      max-width: 650px;
+      line-height: 1.7;
+    }
+
+    .closing-link {
+      font-family: var(--mono);
+      font-size: 22px;
+      color: var(--accent);
+      letter-spacing: 0.03em;
+    }
+
+    #card-7 .card-footer {
+      color: rgba(255,255,255,0.15);
+    }
+  </style>
+</head>
+<body>
+
+<!-- ==================== CARD 1: COVER ==================== -->
+<div class="card" id="card-1">
+  <div class="card-inner">
+    <div class="badge">Vibe Coding Retrospect</div>
+    <h1>Gosling<br>Cinema</h1>
+    <div style="font-family: var(--mono); font-size: 22px; color: var(--accent); letter-spacing: 0.03em; margin: 8px 0 12px;">gosling.savemoss.com</div>
+    <p class="subtitle">
+      从 shader.se 的一段录屏出发，用 7 天做了一个复古 CRT 电影胶卷滚动体验<br>致敬 Ryan Gosling 的五部代表作
+    </p>
+    <div class="stats-row">
+      <div class="stat"><span class="stat-num">7</span><span class="stat-label">天</span></div>
+      <div class="stat"><span class="stat-num">5</span><span class="stat-label">部电影</span></div>
+      <div class="stat"><span class="stat-num">4</span><span class="stat-label">层 Shader</span></div>
+      <div class="stat"><span class="stat-num">$0</span><span class="stat-label">成本</span></div>
+    </div>
+    <div class="film-chips">
+      <div class="film-chip" style="background: linear-gradient(135deg, #e84393, #0a0a2e);">Drive</div>
+      <div class="film-chip" style="background: linear-gradient(135deg, #e17055, #1a0a00);">Blade Runner 2049</div>
+      <div class="film-chip" style="background: linear-gradient(135deg, #6c5ce7, #0d0030);">La La Land</div>
+      <div class="film-chip" style="background: linear-gradient(135deg, #fd79a8, #2d0020);">Barbie</div>
+      <div class="film-chip" style="background: linear-gradient(135deg, #74b9ff, #020810);">Project Hail Mary</div>
+    </div>
+  </div>
+  <div class="card-footer">
+    <span>GOSLING CINEMA</span>
+    <span>1 / 7</span>
+  </div>
+</div>
+
+<!-- ==================== CARD 2: ORIGIN ==================== -->
+<div class="card" id="card-2">
+  <div class="card-inner">
+    <h2>起源：一段录屏和一个念头</h2>
+    <p>
+      看到 <a href="https://shader.se" style="color: var(--accent); text-decoration: none;">shader.se</a> 的复古 CRT 启动 + 3D 胶卷交互后，第一秒就觉得：这种胶卷形式太适合做演员作品集了。
+    </p>
+    <p>
+      正好最近因为《挽救计划》电影对 Ryan Gosling 印象深刻——五部电影，五种完全不同的视觉风格，天然适合用不同的 shader 来呈现。
+    </p>
+    <blockquote>
+      "先行动，从被激发灵感的创意开始。创意是原创-复刻融合微创新的螺旋上升。"
+      <cite>— 开发者</cite>
+    </blockquote>
+    <div class="origin-highlight">
+      <div class="origin-label">Core Idea</div>
+      <p>不是复制 shader.se，而是借鉴范式，用高司令五部代表作做一个有电影感的沉浸式体验。</p>
+    </div>
+  </div>
+  <div class="card-footer">
+    <span>GOSLING CINEMA</span>
+    <span>2 / 7</span>
+  </div>
+</div>
+
+<!-- ==================== CARD 3: DECISIONS ==================== -->
+<div class="card" id="card-3">
+  <div class="card-inner">
+    <h2>核心创意决策</h2>
+    <div class="decision-grid">
+      <div>
+        <div class="decision-title">参考素材</div>
+        <div class="decision-row">
+          <div class="decision-box rejected">
+            <div class="decision-label pass">PASS</div>
+            <div class="decision-text">截图喂给 AI<br>还原度很低，丢失动态信息</div>
+          </div>
+          <div class="decision-box chosen">
+            <div class="decision-label go">CHOSEN</div>
+            <div class="decision-text">录屏 + AnyCap CLI + Gemini<br>结构化理解动态效果</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="decision-title">胶卷布局</div>
+        <div class="decision-row">
+          <div class="decision-box rejected">
+            <div class="decision-label pass">PASS</div>
+            <div class="decision-text">直线胶卷条水平滚动<br>(shader.se 原版)</div>
+          </div>
+          <div class="decision-box chosen">
+            <div class="decision-label go">CHOSEN</div>
+            <div class="decision-text">CSS 3D 旋转木马<br>更强的深度感和层次感</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="decision-title">氛围切换</div>
+        <div class="decision-row">
+          <div class="decision-box rejected">
+            <div class="decision-label pass">PASS</div>
+            <div class="decision-text">换背景图/换色板<br>静态、缺少电影感</div>
+          </div>
+          <div class="decision-box chosen">
+            <div class="decision-label go">CHOSEN</div>
+            <div class="decision-text">每部电影独立 Shader 参数<br>6 个浮点数 = 一种视觉风格</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card-footer">
+    <span>GOSLING CINEMA</span>
+    <span>3 / 7</span>
+  </div>
+</div>
+
+<!-- ==================== CARD 4: TIMELINE ==================== -->
+<div class="card" id="card-4">
+  <div class="card-inner">
+    <h2>开发时间线</h2>
+    <div class="tl">
+      <div class="tl-item">
+        <div class="tl-date">Day 1 — Apr 1</div>
+        <div class="tl-text">录屏分析 shader.se，用 AnyCap + Gemini 生成描述文档。搭建 Vite + Three.js 骨架，CRT boot + 3D 模型 + 后处理管线 + Lenis 滚动全部跑通</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">Day 2 — Apr 2</div>
+        <div class="tl-text">修复 boot screen 时序，调整 carousel 布局，下载电影视频素材，录制当前状态做第二轮分析</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">Day 3 — Apr 3</div>
+        <div class="tl-text">scene.js 大改：镜头双阶段推进动画，shader 参数精调，模型淡出时机优化</div>
+      </div>
+      <div class="tl-item dimmed">
+        <div class="tl-date">Day 4-6</div>
+        <div class="tl-text">间歇性调优</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">Day 7 — Apr 7</div>
+        <div class="tl-text">Carousel 交互最终调优、响应式适配、视频源迁移到 GitHub Releases</div>
+      </div>
+    </div>
+  </div>
+  <div class="card-footer">
+    <span>GOSLING CINEMA</span>
+    <span>4 / 7</span>
+  </div>
+</div>
+
+<!-- ==================== CARD 5: METHOD ==================== -->
+<div class="card" id="card-5">
+  <div class="card-inner">
+    <h2>协作方法：录屏驱动</h2>
+    <div class="method-flow">
+      <span class="hl">录屏</span> (mp4)<br>
+      &nbsp;&nbsp;&rarr; <span class="hl">AnyCap CLI</span> + Gemini<br>
+      &nbsp;&nbsp;&rarr; 结构化描述 (md)<br>
+      &nbsp;&nbsp;&rarr; <span class="hl">Claude Code</span><br>
+      &nbsp;&nbsp;&rarr; 代码
+    </div>
+    <div class="rule-cards">
+      <div class="rule-card">
+        <div class="rule-num">01</div>
+        <div class="rule-text"><strong>视频 &gt; 截图</strong>：截图丢失时序、缓动、物理感。录屏的信息密度高一个量级</div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-num">02</div>
+        <div class="rule-text"><strong>不求完全还原</strong>：AI 基于理解做出的"另一种版本"，可能比刻意复刻更有价值</div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-num">03</div>
+        <div class="rule-text"><strong>分析文档即 Prompt</strong>：把 Gemini 的分析直接喂给 Claude Code 作为上下文，效果最好</div>
+      </div>
+    </div>
+  </div>
+  <div class="card-footer">
+    <span>GOSLING CINEMA</span>
+    <span>5 / 7</span>
+  </div>
+</div>
+
+<!-- ==================== CARD 6: LESSONS ==================== -->
+<div class="card" id="card-6">
+  <div class="card-inner">
+    <h2>五条收获</h2>
+    <div class="lesson-items">
+      <div class="lesson-item">
+        <div class="lesson-num">01</div>
+        <div class="lesson-body">
+          <h4>先行动</h4>
+          <p>看到灵感那一刻就开始。创意是螺旋上升的——先复刻，再理解，最后变成自己的东西</p>
+        </div>
+      </div>
+      <div class="lesson-item">
+        <div class="lesson-num">02</div>
+        <div class="lesson-body">
+          <h4>不完全还原也是成功</h4>
+          <p>3D 旋转木马和 shader.se 长得完全不一样——但那种电影感和沉浸感是对的</p>
+        </div>
+      </div>
+      <div class="lesson-item">
+        <div class="lesson-num">03</div>
+        <div class="lesson-body">
+          <h4>真实内容是魔法</h4>
+          <p>占位符变真实视频的那一刻，项目从"技术 demo"变成"作品"</p>
+        </div>
+      </div>
+      <div class="lesson-item">
+        <div class="lesson-num">04</div>
+        <div class="lesson-body">
+          <h4>CRT Boot 不只是装饰</h4>
+          <p>它掩盖了加载时间，把等待变成体验。好的 loading 不是进度条，是叙事</p>
+        </div>
+      </div>
+      <div class="lesson-item">
+        <div class="lesson-num">05</div>
+        <div class="lesson-body">
+          <h4>Shader 参数是最廉价的氛围引擎</h4>
+          <p>6 个浮点数就能让同一个画面从霓虹朋克变成赛博荒漠，比改模型便宜一百倍</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card-footer">
+    <span>GOSLING CINEMA</span>
+    <span>6 / 7</span>
+  </div>
+</div>
+
+<!-- ==================== CARD 7: CLOSING ==================== -->
+<div class="card" id="card-7">
+  <div class="card-inner">
+    <div class="badge" style="color: rgba(255,255,255,0.3);">Epilogue</div>
+    <div class="closing-divider"></div>
+    <blockquote>
+      "把真实视频素材放进 asset 文件夹，在本地预览成功的那一刻——是整个项目最有成就感的时刻。"
+      <cite>— 开发者</cite>
+    </blockquote>
+    <div class="closing-divider"></div>
+    <p class="closing-sub">
+      从一段录屏开始，到五部电影在 3D 胶卷里流转。<br>
+      不是完美复刻，而是属于自己的版本。
+    </p>
+    <div class="closing-link">gosling.savemoss.com</div>
+  </div>
+  <div class="card-footer">
+    <span>GOSLING CINEMA</span>
+    <span>7 / 7</span>
+  </div>
+</div>
+
+</body>
+</html>

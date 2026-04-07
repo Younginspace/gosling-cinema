@@ -165,8 +165,8 @@ body.no-scroll {
 #carousel-viewport {
   position: fixed;
   left: 0; right: 0;
-  top: 80%;
-  transform: translateY(-40%);
+  top: 100%;
+  transform: translateY(-50%);
   height: var(--strip-height);
   z-index: 10;
   overflow: visible;
@@ -254,8 +254,11 @@ body.no-scroll {
   text-align: center; line-height: 1.8;
 }
 
-.seg-poster img {
+.seg-poster img,
+.seg-video {
   width: 100%; height: 100%; object-fit: cover;
+  display: block;
+  pointer-events: none;
 }
 
 .film-segment-empty {
@@ -300,6 +303,18 @@ body.no-scroll {
   transform: scale(1.3);
 }
 
+/* ==================== MUTE BUTTON ==================== */
+#mute-btn {
+  position: fixed; bottom: 3%; right: 3%;
+  z-index: 20; background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.15); border-radius: 50%;
+  width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+  color: rgba(255,255,255,0.6); cursor: pointer;
+  backdrop-filter: blur(4px); transition: all 0.3s ease;
+}
+#mute-btn:hover { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.9); border-color: rgba(255,255,255,0.3); }
+#mute-btn:active { transform: scale(0.9); }
+
 /* ==================== CREDITS ==================== */
 #credits-line {
   position: fixed; bottom: 1%; left: 50%; transform: translateX(-50%);
@@ -320,7 +335,8 @@ body.no-scroll {
   #film-info-meta { font-size: 0.65rem; }
 
   #carousel-viewport {
-    top: 80%;
+    top: 100%;
+    transform: translateY(-50%);
     perspective: 2000px;
   }
 

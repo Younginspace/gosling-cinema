@@ -115,7 +115,8 @@ const FilmShader = {
       color *= 1.0 - vignette;
 
       float noise = rand(uv * time) * 2.0 - 1.0;
-      color += noise * noiseIntensity;
+      float noiseMask = step(0.7, rand(uv * time * 0.5));
+      color += noise * noiseIntensity * noiseMask;
 
       vec3 sepiaColor = vec3(
         dot(color, vec3(0.393, 0.769, 0.189)),
@@ -139,8 +140,8 @@ export class FilmScene {
 
     // Hero phase: minimal post-processing so 3D model is clearly visible
     this.currentEffects = {
-      bloom: 0.6, chromatic: 0.001, sepia: 0.0,
-      noise: 0.02, vignette: 0.15, scanline: 0.02,
+      bloom: 0.6, chromatic: 0.003, sepia: 0.0,
+      noise: 0.04, vignette: 0.2, scanline: 0.10,
       tint: [1, 1, 1], bgColor: [0, 0, 0],
     };
     this.targetEffects = { ...this.currentEffects, tint: [1, 1, 1], bgColor: [0, 0, 0] };
@@ -172,7 +173,7 @@ export class FilmScene {
     this.revealProgress = 0;        // 0 = hidden, 1 = hero view fully visible
     this.isRevealing = false;
     this._revealStart = 0;
-    this._revealDuration = 1.6;     // fade-in duration
+    this._revealDuration = 0.7;     // fade-in duration
     this._revealCallback = null;
     this._modelReady = false;       // model hidden until reveal
 
@@ -270,7 +271,7 @@ export class FilmScene {
           // Scale model bigger (≈ 8 units) so it dominates the frame
           const box = new THREE.Box3().setFromObject(this.model);
           const size = box.getSize(new THREE.Vector3());
-          const scale = 10.0 / Math.max(size.x, size.y, size.z);
+          const scale = 25.0 / Math.max(size.x, size.y, size.z);
           this.model.scale.setScalar(scale);
           this.modelBaseScale = scale;
 
@@ -278,8 +279,9 @@ export class FilmScene {
           box.setFromObject(this.model);
           const center = box.getCenter(new THREE.Vector3());
           this.model.position.sub(center);
-          this.model.position.x += 3.0;  // push further right
-          this.model.position.y -= 1.8;  // push down
+          this.model.position.x += 14.0;  // push further right
+          this.model.position.y -= 5.0;  // push down
+          this.model.rotation.y += Math.PI / 6;  // rotate 30° to the right
           this.modelBaseY = this.model.position.y;
 
           // Cache meshes for scroll fade
